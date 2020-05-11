@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Last summer semester 2019 I had to do the all-beloved group project for the politic science class "Datenanalyse" with a couple of friends. We set up our own survey on environmental (un-)friendly behavior and luckily got almost 200 people to submit the survey. In order to analyse the data from this survey, three out of four people in our group had to visit courses on R or SPSS, two of us got into the SPSS course and one of my friends did the R course. During our project we figured that with SPSS we would not be able to analyze one of our most important variables, so we thought we were in big trouble. 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+<http://rmarkdown.rstudio.com>.
 
 I would especially like to talk about 
 * Paper 1
