@@ -2,29 +2,36 @@
 title: "Course Expectations"
 author: "Sophia Grill"
 date: "6 5 2020"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## My Expectations from the Course "Big Data Analysis with R"
+# My Expectations from the Course "Big Data Analysis with R"
 
 
-Last summer semester 2019 I had to do the all-beloved group project for the politic science class "Datenanalyse" with a couple of friends. We set up our own survey on environmental (un-)friendly behavior and luckily got almost 200 people to submit the survey. In order to analyse the data from this survey, three out of four people in our group had to visit courses on R or SPSS, two of us got into the SPSS course and one of my friends did the R course. During our project we figured that with SPSS we would not be able to analyze one of our most important variables, so we thought we were in big trouble. 
+Last summer semester 2019 I had to do the all-beloved group project for the politic science class *"Datenanalyse"* with a couple of friends. We set up our own survey on environmental (un-)friendly behavior and luckily got almost 200 people to submit the survey. In order to analyse the data from this survey, three out of four people in our group had to visit courses on R or SPSS, two of us got into the SPSS course and one of my friends did the R course. During our project we figured that with SPSS we would not be able to analyze one of our most important variables, so we thought we were in big trouble. But my other friend who had done the R course with Mr. Heinrich had an Idea. She messaged him and indeed, she could save our project! I haveno idea how she did that exactly, but I still own the syntax for our project. So by the end of this course, I hope that I can understand the code she wrote. 
 
-<http://rmarkdown.rstudio.com>.
+Also, I'm planning to do an internship at the *"Bundesinstitut für Bevölkerungsforschung"*, where I can definitely use some R and SPSS skills. 
 
-I would especially like to talk about 
-* Paper 1
-* Paper 2
-* Paper 3
+Lastly, I am planning to write my **bachelors thesis** as an empirical research paper, if possible I want to analyze another data set (though I have no clue on which subject). I thereby want to find out if a **masters programme** on Social Data Analysis or Computational Social Science would be suitable for me.  
 
-# Überschrift 1
-## Überschrift 2
 
-*kursiv* **fett**
+During the course, I would especially like to talk about: 
+
+* <https://link.springer.com/article/10.1186/s12864-019-6331-8>
+* <http://etheses.whiterose.ac.uk/19315/>
+* <http://eprints.whiterose.ac.uk/92119/2/Keen%20et%20al%20P%26I%20v2%20Jan%202013.pdf>
+* <https://dare.uva.nl/search?identifier=083e84ba-d964-4e14-a64d-525ba37f7213>
+
+
+![Here you can see a cute cat picture](https://placekitten.com/500/300)
+
+
 
 
 
