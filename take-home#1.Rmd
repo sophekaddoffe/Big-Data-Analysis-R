@@ -16,6 +16,7 @@ Well, let's go in medias res. The dataset you will work with is from a tidy Tues
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 library(rvest)
 library(tidyverse)
+library(janitor)
 url <- "https://www.nu3.de/blogs/nutrition/food-carbon-footprint-index-2018" # url to scrape
 
 # scrape the website
@@ -53,6 +54,31 @@ table_content_tbl
 ```
 
 2. Make the dataset tidy. Ask yourself the following questions: which variables does it contain? How can I put them into separate rows? 
+
+```{r}
+long_table <- table_content %>%  
+  # make column names observations of Category variable
+ tidyr::pivot_longer(cols = -Country, names_to = "Category", values_to = "Values") %>%  
+  # separate food-related information from the metric
+ tidyr::separate(col = Category, into = c("Food Category", "Metric"), sep = ';')
+
+glimpse(long_table)
+
+tidy_table <- long_table %>%
+   tidyr::pivot_wider(names_from = Metric, values_from = Values) %>%
+   janitor::clean_names('snake')
+
+glimpse(tidy_table)
+
+
+final_table <- tidy_table %>%
+ rename(consumption = 3,
+         co2_emmission = 4) %>%
+ filter(!stringr::str_detect(food_category, "total"))
+
+head(final_table, 40)
+
+```
 
 3. Change the column names so that they do not have to be surrounded by backticks (i.e., they should only consist of lowercase characters, numbers, dots, and underscores).
 
