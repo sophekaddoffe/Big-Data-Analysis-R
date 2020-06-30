@@ -78,13 +78,70 @@ head(final_table, 40)
 
 
 4. Coerce variables to factors (if it makes sense). 
+```{r}
+
+final_table <- mutate_if(final_table, is.character, as.factor)
+
+head(final_table)
+
+```
 
 5. Visualize your dataset with `ggplot2`.
     a. A scatter plot with `consumption` on the x and `kg_co2` on the y axis. Color the dots according to `country`.
+    
+    ```{r}
+ 
+ggplot(data = final_table) +
+  geom_point(aes(x = consumption, y = co2_emmission, color = country))
+    
+    ```
+    
+    
+    
+    
     b. A smoothed line with the same variables (no country-specific color coding though).
+    
+```{r}
+ggplot(data = final_table) +
+  geom_smooth(aes(x = consumption, y = co2_emmission))
+    
+```
+    
     c. Faceted graphs according to type of food.
+    
+    
+    ```{r}
+    
+ggplot(data = final_table) +
+  geom_point(aes(x = consumption, y = co2_emmission, color = country)) +
+  facet_wrap(~food_category, nrow = 6) # +
+      # scale_x_continuous() +
+      # scale_y_continuous()
+    
+    ```
+    
+    ```{r}
+  
+ggplot(data = final_table) +
+  geom_smooth(aes(x = consumption, y = co2_emmission)) +
+  facet_wrap(~food_category, nrow = 2)
+    
+    ```
+    
+    
     d. A scatter plot with the sum of supply for consumption per country (x axis) and total CO2 emissions per country (y axis). Color the dots as in (a).
+    
+    ```{r}
+    
+    
+    
+    ```
+    
+    
     e. Faceted graphs: countries that start with "a"--"l" and "m"--"z".
+    
+    ```{r}
+    ```
     
 6. Store your dataset as a csv-file.
     
