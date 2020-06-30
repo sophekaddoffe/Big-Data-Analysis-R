@@ -54,33 +54,28 @@ table_content_tbl
 ```
 
 2. Make the dataset tidy. Ask yourself the following questions: which variables does it contain? How can I put them into separate rows? 
+3. Change the column names so that they do not have to be surrounded by backticks (i.e., they should only consist of lowercase characters, numbers, dots, and underscores).
 
 ```{r}
 long_table <- table_content %>%  
-  # make column names observations of Category variable
  tidyr::pivot_longer(cols = -Country, names_to = "Category", values_to = "Values") %>%  
-  # separate food-related information from the metric
- tidyr::separate(col = Category, into = c("Food Category", "Metric"), sep = ';')
-
-glimpse(long_table)
+ separate(col = Category, into = c("Food Category", "Metric"), sep = ';')
 
 tidy_table <- long_table %>%
-   tidyr::pivot_wider(names_from = Metric, values_from = Values) %>%
-   janitor::clean_names('snake')
-
-glimpse(tidy_table)
+   pivot_wider(names_from = Metric, values_from = Values) 
 
 
 final_table <- tidy_table %>%
- rename(consumption = 3,
-         co2_emmission = 4) %>%
- filter(!stringr::str_detect(food_category, "total"))
+ rename(consumption = `Supplied for Consumption (kg/person/year)`,
+        co2_emmission = `Kg CO2/person/year`,
+        country = Country,
+        food_category = `Food Category`) %>%
+ drop_na()
 
 head(final_table, 40)
 
 ```
 
-3. Change the column names so that they do not have to be surrounded by backticks (i.e., they should only consist of lowercase characters, numbers, dots, and underscores).
 
 4. Coerce variables to factors (if it makes sense). 
 
