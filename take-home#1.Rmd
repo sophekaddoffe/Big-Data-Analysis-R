@@ -1,22 +1,15 @@
 ---
 title: "Take-home Assignment #1"
-author: "Felix Lennert"
+author: "Jakob Berg and Sophia Grill"
 date: "handed out on 2020-06-29; to be handed in on 2020-07-06 at latest"
 output: html_document
 ---
-
-Dear student,
-
-This is the first take-home assignment for the course "Big Data Analysis with R." You can team up with one of your peers and work on it together. I am absolutely sure that it will challenge you and this is definitely intended. If you have questions, reach out whenever. Seriously, whenever. So far, very few of you have done so. Therefore, I have no clue how good or bad it is going for you. 
-
-Well, let's go in medias res. The dataset you will work with is from a tidy Tuesday challenge. I will not provide you the source right now, because then you could just simply look up the solution online. However, if you are stuck, you can try to search for it. To make sure that you have understood what you are doing, I want you to add comments next to your code, i.e., by inserting a '#' on the right of the code and briefly describing why this command is necessary. You can also describe what the chunks are doing in the Markdown file between chunks. 
 
 1. Acquire the dataset by running the following chunk. Install the missing packages first if necessary. I commented the code for you to show you some web-scraping and how you should comment your code.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 library(rvest)
 library(tidyverse)
-library(janitor)
 url <- "https://www.nu3.de/blogs/nutrition/food-carbon-footprint-index-2018" # url to scrape
 
 # scrape the website
@@ -80,8 +73,11 @@ head(final_table, 40)
 4. Coerce variables to factors (if it makes sense). 
 ```{r}
 
-final_table <- mutate_if(final_table, is.character, as.factor)
+# final_table <- mutate_if(final_table, is.character, as.factor)
+# fctr useful for country, because it's arranged due to co2_emmission (descending)
 
+final_table <- mutate_at(final_table, vars(country, food_category), as.factor)
+final_table <- mutate_at(final_table, vars(consumption, co2_emmission), as.numeric)
 head(final_table)
 
 ```
@@ -94,16 +90,76 @@ head(final_table)
 ggplot(data = final_table) +
   geom_point(aes(x = consumption, y = co2_emmission, color = country))
     
+
+    
     ```
+  
+    
+```{r}
+
+    
+library(countrycode)
+#df <- data.frame(country = c("Afghanistan",
+                            # "Algeria",
+                            # "USA",
+                            # "France",
+                            # "New Zealand",
+                            # "Fantasyland"))
+
+final_table$continent <- countrycode(sourcevar = final_table[, "country"],
+                            origin = "country.name",
+                            destination = "continent")
+
+head(final_table)
+
+```
+
+```{r}
+
+final_table_df <- as.data.frame(final_table)
+
+  
+library(countrycode)
+#df <- data.frame(country = c("Afghanistan",
+                            # "Algeria",
+                            # "USA",
+                            # "France",
+                            # "New Zealand",
+                            # "Fantasyland"))
+
+final_table_df$continent <- countrycode(sourcevar = final_table_df[, "country"],
+                            origin = "country.name",
+                            destination = "continent")
+
+head(final_table_df)
+
+```
     
     
     
+    ```{r}
+ 
+ggplot(data = final_table_df) +
+  geom_point(aes(x = consumption, y = co2_emmission, color = continent)) +
+      labs(x="Consumption in kg per Person per Year", y= "CO2 Emmission in kg per Person per Year",
+       title="CO2 Emmission vs Food Consumption")+
+  theme_bw(base_size = 16)
+    
+
+    
+    ```    
+
+
+
     
     b. A smoothed line with the same variables (no country-specific color coding though).
     
 ```{r}
 ggplot(data = final_table) +
-  geom_smooth(aes(x = consumption, y = co2_emmission))
+  geom_smooth(aes(x = consumption, y = co2_emmission)) +
+      labs(x="Consumption in kg per Person per Year", y= "CO2 Emmission in kg per Person per Year",
+       title="CO2 Emmission vs Food Consumption")+
+  theme_bw(base_size = 16)
     
 ```
     
@@ -113,20 +169,37 @@ ggplot(data = final_table) +
     ```{r}
     
 ggplot(data = final_table) +
-  geom_point(aes(x = consumption, y = co2_emmission, color = country)) +
-  facet_wrap(~food_category, nrow = 6) # +
-      # scale_x_continuous() +
-      # scale_y_continuous()
+  geom_point(aes(x = consumption, y = co2_emmission)) +
+  facet_wrap(~food_category, nrow = 3) #+
+      #scale_x_continuous() +
+      #scale_y_continuous()
+    
     
     ```
-    
-    ```{r}
+
+```{r}
+final_table %>%    
+ggplot(aes (x = consumption, y = co2_emmission)) +
+  geom_point(alpha=0.3) + 
+  labs(x="Food Consumption in kg per Person per Year", y= "CO2 Emission in kg per person per Year",
+       title="CO2 emission vs Food Consumption") +
+  scale_y_continuous()+
+  scale_x_continuous()+
+  geom_smooth(method=lm,se=FALSE)+
+  facet_wrap(~food_category, ncol=4)+
+  theme_bw(base_size = 16)
+
+```
+  
+  
+  
+```{r}
   
 ggplot(data = final_table) +
   geom_smooth(aes(x = consumption, y = co2_emmission)) +
   facet_wrap(~food_category, nrow = 2)
     
-    ```
+```
     
     
     d. A scatter plot with the sum of supply for consumption per country (x axis) and total CO2 emissions per country (y axis). Color the dots as in (a).
