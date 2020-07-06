@@ -1,11 +1,11 @@
 ---
 title: "Take-home Assignment #1"
 author: "Jakob Berg and Sophia Grill"
-date: "handed out on 2020-06-29; to be handed in on 2020-07-06 at latest"
+date: "`r lubridate::today()`"
 output: html_document
 ---
 
-1. Acquire the dataset by running the following chunk. Install the missing packages first if necessary. I commented the code for you to show you some web-scraping and how you should comment your code.
+# 1. Acquire the dataset by running the following chunk. Install the missing packages first if necessary.
 
 ```{r echo=TRUE, message=FALSE, warning=FALSE}
 library(rvest)
@@ -46,16 +46,16 @@ table_content_tbl <- as_tibble(table_content)
 table_content_tbl
 ```
 
-2. Make the dataset tidy. Ask yourself the following questions: which variables does it contain? How can I put them into separate rows? 
-3. Change the column names so that they do not have to be surrounded by backticks (i.e., they should only consist of lowercase characters, numbers, dots, and underscores).
+# 2. Make the dataset tidy. Ask yourself the following questions: which variables does it contain? How can I put them into separate rows? 
+# 3. Change the column names so that they do not have to be surrounded by backticks (i.e., they should only consist of lowercase characters, numbers, dots, and underscores).
 
 ```{r}
 long_table <- table_content %>%  
- tidyr::pivot_longer(cols = -Country, names_to = "Category", values_to = "Values") %>%  
- separate(col = Category, into = c("Food Category", "Metric"), sep = ';')
+ pivot_longer(cols = -Country, names_to = "Category", values_to = "Values") %>% # column names of category variable
+ separate(col = Category, into = c("Food Category", "Metric"), sep = ';') # separates food category from metric variables
 
 tidy_table <- long_table %>%
-   pivot_wider(names_from = Metric, values_from = Values) 
+   pivot_wider(names_from = Metric, values_from = Values) # splits metric variables into consumption and emmission
 
 
 final_table <- tidy_table %>%
@@ -63,162 +63,187 @@ final_table <- tidy_table %>%
         co2_emmission = `Kg CO2/person/year`,
         country = Country,
         food_category = `Food Category`) %>%
- drop_na()
+ drop_na() # drops all NAs, important because we want to get rid of the emmission sum entries of each country 
 
 head(final_table, 40)
 
 ```
 
 
-4. Coerce variables to factors (if it makes sense). 
-```{r}
+# 4. Coerce variables to factors (if it makes sense). 
 
-# final_table <- mutate_if(final_table, is.character, as.factor)
-# fctr useful for country, because it's arranged due to co2_emmission (descending)
+We coerced the countries into factors, because in the original table on the website they were arranged due to co2 emmissions (descending). Also, we had to coerce consumption and co2_emmission to numeric variables in order to use them in our plots.
+
+```{r}
 
 final_table <- mutate_at(final_table, vars(country, food_category), as.factor)
 final_table <- mutate_at(final_table, vars(consumption, co2_emmission), as.numeric)
+
 head(final_table)
 
 ```
 
-5. Visualize your dataset with `ggplot2`.
-    a. A scatter plot with `consumption` on the x and `kg_co2` on the y axis. Color the dots according to `country`.
-    
-    ```{r}
- 
+# 5. Visualize your dataset with `ggplot2`.
+## a. A scatter plot with `consumption` on the x and `kg_co2` on the y axis. Color the dots according to `country`.
+
+
+```{r}
+
 ggplot(data = final_table) +
-  geom_point(aes(x = consumption, y = co2_emmission, color = country))
-    
-
-    
-    ```
+  geom_point(aes(x = consumption, y = co2_emmission, color = country)) +
+  theme(legend.position = "right", # determines position of legend in plot
+        legend.title = element_text(size = 2),
+        legend.text = element_text(size = 2),
+        plot.title = element_text(size = 12)) +
+  guides(color = guide_legend(override.aes = list(size = 0.5)), # determines size of legend
+         fill = guide_legend(nrow = 5, byrow = TRUE)) +
+  ggtitle("CO2-emission by consumption per country") +
+  ylab("CO2-emission per person per year in kg") +
+  xlab("Consumption per person per year in kg") 
   
-    
-```{r}
-
-    
-library(countrycode)
-#df <- data.frame(country = c("Afghanistan",
-                            # "Algeria",
-                            # "USA",
-                            # "France",
-                            # "New Zealand",
-                            # "Fantasyland"))
-
-final_table$continent <- countrycode(sourcevar = final_table[, "country"],
-                            origin = "country.name",
-                            destination = "continent")
-
-head(final_table)
 
 ```
 
+  
+As you can see, there are a lot of different countries as colored data points. That is why we decided to group the countries into continents. Therefore, we used the countrycode package. But as we are workung with a tibble, we had to first convert it to a dataframe to make it work. 
+
+
 ```{r}
 
-final_table_df <- as.data.frame(final_table)
+final_table_df <- as.data.frame(final_table) # converts tibble to data frame
 
   
 library(countrycode)
-#df <- data.frame(country = c("Afghanistan",
-                            # "Algeria",
-                            # "USA",
-                            # "France",
-                            # "New Zealand",
-                            # "Fantasyland"))
 
 final_table_df$continent <- countrycode(sourcevar = final_table_df[, "country"],
                             origin = "country.name",
-                            destination = "continent")
+                            destination = "continent") # using the country code package to group countries into continents
 
 head(final_table_df)
 
 ```
     
     
-    
-    ```{r}
- 
-ggplot(data = final_table_df) +
-  geom_point(aes(x = consumption, y = co2_emmission, color = continent)) +
-      labs(x="Consumption in kg per Person per Year", y= "CO2 Emmission in kg per Person per Year",
-       title="CO2 Emmission vs Food Consumption")+
-  theme_bw(base_size = 16)
-    
-
-    
-    ```    
-
-
-
-    
-    b. A smoothed line with the same variables (no country-specific color coding though).
+Now the colored dots in the graph represent different continents!
     
 ```{r}
+ 
+ggplot(data = final_table_df) +
+  geom_point(aes(x = consumption, y = co2_emmission, color = continent)) + # calling geom_point for a scatterplot
+      labs(x = "Consumption in kg per Person per Year", y = "CO2 Emmission in kg per Person per Year",
+       title = "CO2 Emmission vs Food Consumption")+
+  theme_bw(base_size = 16) # choosing theme and font size
+    
+    
+```    
+
+
+
+    
+## b. A smoothed line with the same variables (no country-specific color coding though).
+    
+```{r}
+
 ggplot(data = final_table) +
   geom_smooth(aes(x = consumption, y = co2_emmission)) +
-      labs(x="Consumption in kg per Person per Year", y= "CO2 Emmission in kg per Person per Year",
-       title="CO2 Emmission vs Food Consumption")+
+      labs(x = "Consumption in kg per Person per Year", y = "CO2 Emmission in kg per Person per Year",
+       title = "CO2 Emmission vs Food Consumption") +
   theme_bw(base_size = 16)
     
 ```
     
-    c. Faceted graphs according to type of food.
+## c. Faceted graphs according to type of food.
     
-    
-    ```{r}
-    
-ggplot(data = final_table) +
-  geom_point(aes(x = consumption, y = co2_emmission)) +
-  facet_wrap(~food_category, nrow = 3) #+
-      #scale_x_continuous() +
-      #scale_y_continuous()
-    
-    
-    ```
 
 ```{r}
 final_table %>%    
 ggplot(aes (x = consumption, y = co2_emmission)) +
-  geom_point(alpha=0.3) + 
-  labs(x="Food Consumption in kg per Person per Year", y= "CO2 Emission in kg per person per Year",
-       title="CO2 emission vs Food Consumption") +
-  scale_y_continuous()+
-  scale_x_continuous()+
-  geom_smooth(method=lm,se=FALSE)+
-  facet_wrap(~food_category, ncol=4)+
+  geom_point(alpha = 0.3) + # sets size of points
+    labs(x = "Food Consumption in kg per Person per Year", y = "CO2 Emission in kg per person per Year",
+       title = "CO2 emission vs Food Consumption") +
+  scale_y_continuous() +
+  scale_x_continuous() +
+  geom_smooth(method = lm,se = FALSE) +
+  facet_wrap(~food_category, ncol = 4) + # creates 4 columns
   theme_bw(base_size = 16)
 
 ```
   
-  
-  
+
+    
+    
+## d. A scatter plot with the sum of supply for consumption per country (x axis) and total CO2 emissions per country (y axis). Color the dots as in (a).
+    
 ```{r}
-  
-ggplot(data = final_table) +
-  geom_smooth(aes(x = consumption, y = co2_emmission)) +
-  facet_wrap(~food_category, nrow = 2)
+
+consumption_sum <- final_table %>%
+  group_by(country) %>%
+  summarize(consumption_sum = sum(as.numeric(consumption), na.rm = FALSE)) # creates tibble with summed-up consumption per country
+
+ 
+co2_sum <- final_table %>%
+  group_by(country) %>%
+  summarize(co2_sum = sum(as.numeric(co2_emmission), na.rm = FALSE)) # creates tibble with summed-up co2-emmission per country
+ 
+
+sum_both <- merge(x = consumption_sum, y = co2_sum, by = "country", all = TRUE) # merges both tibbles created above
+
+
+scatterplot_sum_both <- ggplot(data = sum_both) +
+  geom_point(aes(x = consumption_sum, y = co2_sum, color = country)) +
+  theme(legend.position = "right",
+        legend.title = element_text(size = 2),
+        legend.text = element_text(size = 2),
+        plot.title = element_text(size = 12)) +
+  guides(color = guide_legend(override.aes = list(size = 0.5)),
+         fill = guide_legend(nrow = 5, byrow = TRUE)) +
+  ggtitle("Total CO2-emission by total consumption per country") +
+  ylab("Total CO2-emission per person per year in kg") +
+  xlab("Total Consumption per person per year in kg")
+
+ 
+scatterplot_sum_both
+
     
 ```
     
     
-    d. A scatter plot with the sum of supply for consumption per country (x axis) and total CO2 emissions per country (y axis). Color the dots as in (a).
+## e. Faceted graphs: countries that start with "a"--"l" and "m"--"z".
     
-    ```{r}
-    
-    
-    
-    ```
-    
-    
-    e. Faceted graphs: countries that start with "a"--"l" and "m"--"z".
-    
-    ```{r}
-    ```
-    
-6. Store your dataset as a csv-file.
-    
-You work with a tibble, so use means from the `tidyverse` packages and store your data in a tibble. Data manipulations should be performed using the pipe operator. Code for 2--4 can be put in one chunk. If you need some further information, drop me an email with "hint" in it and I will provide you some. Assignment is to be handed in as an RMarkdown (you can build upon this one) and html file until 2020-07-06 via email. 
+```{r}
 
-Have fun,  
-Felix
+sum_both_numbers <- sum_both %>%
+  mutate(c_number = 1:130) %>%
+  mutate(indicator = case_when(as.numeric(c_number) < 70 ~ 0,
+                               as.numeric(c_number) >= 70 ~ 1)) # creates column with index about first letter of country
+
+
+scatterplot_al_mz <- ggplot(sum_both_numbers) +
+  geom_point(aes(consumption_sum, y = co2_sum, color = country)) +
+  theme(legend.position = "right",
+        legend.title = element_text(size = 2),
+        legend.text = element_text(size = 2),
+        plot.title = element_text(size = 12)) +
+  guides(color = guide_legend(override.aes = list(size = 0.5)),
+         fill = guide_legend(nrow = 5, byrow = TRUE)) +
+  ylab("Total CO2-emission per person per year in kg") +
+  xlab("Total Consumption per person per year in kg") +
+  ggtitle("Total CO2-emission by total consumption per country") +
+  facet_wrap(~indicator,
+             labeller = labeller(indicator = # dtermines labels of facet wraps
+    c("0" = "Countries A-L",
+      "1" = "Countries M-Z")),
+             nrow = 4)
+
+scatterplot_al_mz
+
+```
+    
+# 6. Store your dataset as a csv-file.
+
+```{r}
+
+write.csv(final_table, "final_table.csv")
+
+```
+    
